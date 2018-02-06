@@ -1,0 +1,81 @@
+package tech.summerly.streamcache.cache
+
+import tech.summerly.streamcache.StreamCacheUtil
+import tech.summerly.streamcache.strategy.CacheStrategy
+import tech.summerly.streamcache.utils.LoggerLevel
+import tech.summerly.streamcache.utils.log
+import java.io.File
+import java.io.RandomAccessFile
+
+/**
+ * author : YangBin
+ *
+ * provide method to write and read file bytes
+ *
+ * @param filename the name of cache file
+ * @param cacheStrategy the strategy when file is cached
+ */
+internal class FileCache(
+        filename: String,
+        private val cacheStrategy: CacheStrategy
+) : Cache() {
+
+    companion object {
+        const val SUFFIX = ".download"
+    }
+
+    private val cachedFile: File
+
+    private val data: RandomAccessFile
+
+    private var _isComplete: Boolean = false
+
+    init {
+        val file = File(StreamCacheUtil.CACHE_DIR, filename)
+        val mode: String
+        if (file.exists()) {
+            cachedFile = file
+            mode = "r"
+        } else {
+            cachedFile = File(StreamCacheUtil.CACHE_DIR, filename + SUFFIX)
+            mode = "rw"
+        }
+        data = RandomAccessFile(cachedFile, mode)
+    }
+
+    override val available: Long
+        get() = data.length()
+
+    override val isComplete: Boolean
+        get() = _isComplete || (cachedFile.exists() && !cachedFile.path.endsWith(SUFFIX))
+
+    @Synchronized
+    override fun read(position: Long, byteArray: ByteArray, offset: Int, len: Int): Int {
+        data.seek(position)
+        return data.read(byteArray, offset, len)
+    }
+
+    @Synchronized
+    override fun write(byteArray: ByteArray, off: Int, len: Int) {
+        if (isComplete) {
+            return
+        }
+        data.seek(available)
+        data.write(byteArray, off, len)
+    }
+
+    override fun close() {
+        if (isComplete) {
+            return
+        }
+        val file = File(cachedFile.path.removeSuffix(SUFFIX))
+        if (cachedFile.renameTo(file)) {
+            cacheStrategy.onFileCached(file)
+            if (file.exists()) {
+                _isComplete = true
+            }
+        } else {
+            log(LoggerLevel.ERROR) { "close file ${cachedFile.path} failed" }
+        }
+    }
+}
