@@ -18,7 +18,7 @@ object StreamCacheUtil {
         get() = cache_dir_ ?: throw RuntimeException("haven't init")
 
     fun init(context: Context) {
-        cache_dir_ = File(context.cacheDir, "stream_cache")
+        cache_dir_ = File(context.externalCacheDir, "stream_cache")
         cache_dir_?.mkdirs()
     }
 

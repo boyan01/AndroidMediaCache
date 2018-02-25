@@ -8,7 +8,7 @@ private val DEBUG get() = BuildConfig.DEBUG
 
 private const val TAG = "QUIET"
 
-fun log(level: LoggerLevel = LoggerLevel.INFO, lazyMessage: () -> Any?) {
+internal fun log(level: LoggerLevel = LoggerLevel.INFO, lazyMessage: () -> Any?) {
     if (DEBUG) {
         val traceElement = Exception().stackTrace[2]
         val traceInfo = with(traceElement) {
@@ -31,7 +31,7 @@ private fun logByAndroid(message: String, level: LoggerLevel, tag: String = TAG)
     LoggerLevel.ERROR -> Log.e(tag, message)
 }
 
-enum class LoggerLevel {
+internal enum class LoggerLevel {
     DEBUG,
     INFO,
     WARN,
