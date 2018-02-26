@@ -1,2 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="tech.summerly.streamcache" />
+    package="tech.summerly.streamcache">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+</manifest>
