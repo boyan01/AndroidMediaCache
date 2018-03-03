@@ -7,15 +7,16 @@ to cache MediaPlayer stream when playing
 1. add gradle dependencies
 
 ```groovy
-implementation 'tech.summerly:streamcache:1.1'
+implementation "tech.summerly:streamcache:$latest_version"
 ```
 
-2. initail in Application
+2. initial in Application or others
 
 ```kotlin
 override fun onCreate(){
     //to init cache folder
-    StreamCacheUtil.init(this)
+    CacheGlobalSetting.CACHE_PATH = externalCacheDir.path
+    CacheGlobalSetting.CACHE_SIZE = 800_000_000
 }
 ```
 

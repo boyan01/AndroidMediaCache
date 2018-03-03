@@ -2,7 +2,6 @@ package tech.summerly.streamcache
 
 import android.net.Uri
 import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import tech.summerly.streamcache.cache.Cache
 import tech.summerly.streamcache.cache.FileCache

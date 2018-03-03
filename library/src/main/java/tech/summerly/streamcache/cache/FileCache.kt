@@ -1,6 +1,6 @@
 package tech.summerly.streamcache.cache
 
-import tech.summerly.streamcache.StreamCacheUtil
+import tech.summerly.streamcache.CacheGlobalSetting
 import tech.summerly.streamcache.strategy.CacheStrategy
 import tech.summerly.streamcache.utils.LoggerLevel
 import tech.summerly.streamcache.utils.log
@@ -29,14 +29,14 @@ internal class FileCache(
     private val data: RandomAccessFile
 
     init {
-        val file = File(StreamCacheUtil.CACHE_DIR, filename)
+        val file = File(CacheGlobalSetting.getCacheDir(), filename)
         val mode: String
         if (file.exists()) {
             cachedFile = file
             log { "file has been cached : ${cachedFile.path}" }
             mode = "r"
         } else {
-            cachedFile = File(StreamCacheUtil.CACHE_DIR, filename + SUFFIX)
+            cachedFile = File(CacheGlobalSetting.getCacheDir(), filename + SUFFIX)
             if (!cachedFile.exists()) {
                 cachedFile.createNewFile()
             }
