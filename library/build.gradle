@@ -68,8 +68,9 @@ publish {
     groupId = 'tech.summerly'
     artifactId = 'streamcache'
     publishVersion = android.defaultConfig.versionName
-    description = 'cache android stream to file'
+    description = 'cache MediaPlayer stream to file when playing'
     website = 'http://summerly.tech'
+
 }
 
 tasks.withType(Javadoc).all {
