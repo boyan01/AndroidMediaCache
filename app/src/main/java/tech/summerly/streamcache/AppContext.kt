@@ -9,6 +9,6 @@ class AppContext : Application() {
     override fun onCreate() {
         super.onCreate()
         CacheGlobalSetting.CACHE_PATH = externalCacheDir.path
-        CacheGlobalSetting.CACHE_SIZE = 800_000_000
+//        CacheGlobalSetting.CACHE_SIZE = 800_000_000
     }
 }

@@ -1,6 +1,6 @@
-# AndroidStreamCache
+# AndroidStreamCache [![Download](https://api.bintray.com/packages/summerly/maven/streamcache/images/download.svg)](https://bintray.com/summerly/maven/streamcache/_latestVersion)
 
-to cache MediaPlayer stream when playing
+to cache MediaPlayer stream when playing 
 
 ## HOW TO USE
 
