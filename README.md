@@ -1,8 +1,8 @@
 # AndroidStreamCache [![Download](https://api.bintray.com/packages/summerly/maven/streamcache/images/download.svg)](https://bintray.com/summerly/maven/streamcache/_latestVersion)
 
-to cache MediaPlayer stream when playing 
+为 MediaPlayer 提供一个扩展，实现边放边缓存的功能。
 
-## HOW TO USE
+## 如何使用
 
 1. add gradle dependencies
 
@@ -10,7 +10,7 @@ to cache MediaPlayer stream when playing
 implementation "tech.summerly:streamcache:$latest_version"
 ```
 
-2. initial in Application or others
+2. 初始化一些变量
 
 ```kotlin
 override fun onCreate(){
@@ -33,7 +33,7 @@ private class MediaDataSourceDelegate(dataSource: DataSource)
    mediaPlayer.setDataSource(MediaDataSourceDelegate(dataSource))
    ```
 
-## APPENDIX
+## 附
 
 ```kotlin
 val dataSource = CachedDataSource(uri = Uri.parse(url),
@@ -42,13 +42,13 @@ val dataSource = CachedDataSource(uri = Uri.parse(url),
                                  cacheStrategy = LruCacheStrategy)
 ```
 
-* **CacheNameGenerator** to generate a unique file name for url
-* **HeaderInjector** inject header for http request
-* **CacheStrategy** manage caching
+* **CacheNameGenerator** 为指定的 url 生成一个独特的名字
+* **HeaderInjector** 访问 url 所附带的 http 头 
+* **CacheStrategy** 成功缓存后的策略
 
 ## for other MediaPlayer 
 
-ex : `ijkMediaPlayer`
+例如 : `ijkMediaPlayer`
 
 ```kotlin
 //create a custom MediaDataSource
