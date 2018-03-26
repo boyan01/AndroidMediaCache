@@ -5,7 +5,7 @@ import java.io.File
 /**
  * author : YangBin
  */
-internal object EmptyCacheStrategy : CacheStrategy {
+object EmptyCacheStrategy : CacheStrategy {
 
     override fun onFileCached(file: File) {
         //do nothing

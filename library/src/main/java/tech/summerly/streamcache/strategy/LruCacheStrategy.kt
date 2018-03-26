@@ -1,7 +1,7 @@
 package tech.summerly.streamcache.strategy
 
 import kotlinx.coroutines.experimental.async
-import tech.summerly.streamcache.StreamCacheUtil
+import tech.summerly.streamcache.CacheGlobalSetting
 import tech.summerly.streamcache.utils.LoggerLevel
 import tech.summerly.streamcache.utils.log
 import java.io.File
@@ -11,8 +11,6 @@ import java.io.File
  */
 object LruCacheStrategy : CacheStrategy {
 
-    private const val DEFAULT_MAX_LIMIT_SIZE = 1024 * 1024 * 1024 // 1GB
-
     override fun onFileCached(file: File) {
         if (!file.exists()) {
             log(LoggerLevel.ERROR) { "file has been cached , but still not exists" }
@@ -20,7 +18,7 @@ object LruCacheStrategy : CacheStrategy {
         }
         async {
             file.setLastModified(System.currentTimeMillis())
-            val files = StreamCacheUtil.CACHE_DIR.listFiles() ?: return@async
+            val files = CacheGlobalSetting.getCacheDir()?.listFiles() ?: return@async
             clearUp(files)
         }
     }
@@ -30,7 +28,7 @@ object LruCacheStrategy : CacheStrategy {
         files.sortBy { it.lastModified() }
         var totalSize = files.calculateTotalSize()
         files.forEach { file ->
-            if (totalSize > DEFAULT_MAX_LIMIT_SIZE) {
+            if (totalSize > CacheGlobalSetting.CACHE_SIZE) {
                 val size = file.length()
                 if (file.delete()) {
                     totalSize -= size

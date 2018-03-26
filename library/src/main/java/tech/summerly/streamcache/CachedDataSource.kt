@@ -2,7 +2,7 @@ package tech.summerly.streamcache
 
 import android.net.Uri
 import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.cancelAndJoin
 import kotlinx.coroutines.experimental.launch
 import tech.summerly.streamcache.cache.Cache
 import tech.summerly.streamcache.cache.FileCache
@@ -99,10 +99,23 @@ open class CachedDataSource internal constructor(
     }
 
     override fun close() {
-        log { "close DataSource..." }
-        cache.close()
-        source.close()
-        sourceReaderJob?.cancel()
+        launch {
+            try {
+                //必须在cache和source关闭之前关闭缓存任务
+                sourceReaderJob?.cancelAndJoin()
+            } catch (e: Exception) {
+            }
+            try {
+                source.close()
+            } catch (e: Exception) {
+
+            }
+            try {
+                cache.close()
+            } catch (e: Exception) {
+
+            }
+        }
     }
 
     private var sourceReaderJob: Job? = null

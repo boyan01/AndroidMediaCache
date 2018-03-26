@@ -20,8 +20,8 @@ android {
     defaultConfig {
         minSdkVersion min_sdk.toInteger()
         targetSdkVersion target_sdk.toInteger()
-        versionCode 2
-        versionName "1.1"
+        versionCode 3
+        versionName "1.1.3"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
@@ -68,8 +68,9 @@ publish {
     groupId = 'tech.summerly'
     artifactId = 'streamcache'
     publishVersion = android.defaultConfig.versionName
-    description = 'cache android stream to file'
+    description = 'cache MediaPlayer stream to file when playing'
     website = 'http://summerly.tech'
+
 }
 
 tasks.withType(Javadoc).all {
