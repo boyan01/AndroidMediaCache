@@ -18,6 +18,7 @@ internal fun String.md5(): String {
 //缓存文件命名生成器
 internal typealias CacheNameGenerator = (url: String) -> String
 
+internal typealias HttpHeader = MutableMap<String, String>
 
 /**
  * default name generator, use the url md5 to generator cache name
