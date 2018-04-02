@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">AndroidStreamCache</string>
+    <string name="template_selected_source">current selected : %s</string>
 </resources>

@@ -1,6 +1,5 @@
 package tech.summerly.streamcache.strategy
 
-import kotlinx.coroutines.experimental.async
 import tech.summerly.streamcache.CacheGlobalSetting
 import tech.summerly.streamcache.utils.LoggerLevel
 import tech.summerly.streamcache.utils.log
@@ -16,11 +15,9 @@ object LruCacheStrategy : CacheStrategy {
             log(LoggerLevel.ERROR) { "file has been cached , but still not exists" }
             return
         }
-        async {
-            file.setLastModified(System.currentTimeMillis())
-            val files = CacheGlobalSetting.getCacheDir()?.listFiles() ?: return@async
-            clearUp(files)
-        }
+        file.setLastModified(System.currentTimeMillis())
+        val files = CacheGlobalSetting.getCacheDir()?.listFiles() ?: return
+        clearUp(files)
     }
 
     //to clear up cache

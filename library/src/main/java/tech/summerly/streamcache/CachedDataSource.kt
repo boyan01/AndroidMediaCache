@@ -1,16 +1,16 @@
 package tech.summerly.streamcache
 
 import android.net.Uri
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.cancelAndJoin
-import kotlinx.coroutines.experimental.launch
 import tech.summerly.streamcache.cache.Cache
 import tech.summerly.streamcache.cache.FileCache
-import tech.summerly.streamcache.cache.source.HttpSource
-import tech.summerly.streamcache.cache.source.Source
+import tech.summerly.streamcache.source.HttpSource
+import tech.summerly.streamcache.source.Source
 import tech.summerly.streamcache.strategy.CacheStrategy
 import tech.summerly.streamcache.strategy.LruCacheStrategy
-import tech.summerly.streamcache.utils.*
+import tech.summerly.streamcache.utils.CacheNameGenerator
+import tech.summerly.streamcache.utils.HeaderInjector
+import tech.summerly.streamcache.utils.emptyHeaderInjector
+import tech.summerly.streamcache.utils.md5NameGenerator
 
 /**
  * author : YangBin
@@ -23,8 +23,6 @@ open class CachedDataSource internal constructor(
 
 
     companion object {
-
-        private const val SIZE_BUFFER = 4096
 
         /**
          * 使用此方法来构造 CachedDataSource
@@ -45,42 +43,34 @@ open class CachedDataSource internal constructor(
         }
     }
 
-    private var currentPosition: Long = -1
-
     override fun readAt(position: Long, buffer: ByteArray, offset: Int, size: Int): Int {
         if (size == 0) {
             return 0
         }
-        val read = if (isUseCache(position)) {
+        return if (isUseCache(position)) {
             readByCache(position, buffer, offset, size)
         } else {
             readDirectly(position, buffer, offset, size)
         }
-        currentPosition = position
-        if (read >= 0) {
-            currentPosition += read
-        }
-        return read
     }
 
     private fun readByCache(position: Long, buffer: ByteArray, offset: Int, size: Int): Int {
         while (!cache.isComplete && cache.available < position + size) {
-            readSourceAsync()
-            waitForSource()
+            //todo 是一次性读取所有source到cache中，还是一次只读取一点点呢？？
+            //read data from origin source
+            val bytes = source.read(buffer, cache.available)
+            if (bytes == -1) {
+                cache.complete()
+                break
+            }
+            cache.write(buffer, 0, bytes)
         }
         return cache.read(position, buffer, offset, size)
     }
 
     //直接从source读取资源
     private fun readDirectly(position: Long, buffer: ByteArray, offset: Int, size: Int): Int {
-        //stop cache process
-        sourceReaderJob?.cancel()
-        //重新打开资源
-        if (currentPosition != position) {
-            source.open(position)
-        }
-        //再从资源开始读取
-        return source.read(buffer, offset, size)
+        return source.read(buffer, position, offset, size)
     }
 
     /**
@@ -99,55 +89,32 @@ open class CachedDataSource internal constructor(
     }
 
     override fun close() {
-        launch {
-            try {
-                //必须在cache和source关闭之前关闭缓存任务
-                sourceReaderJob?.cancelAndJoin()
-            } catch (e: Exception) {
-            }
-            try {
-                source.close()
-            } catch (e: Exception) {
-
-            }
-            try {
-                cache.close()
-            } catch (e: Exception) {
-
-            }
-        }
-    }
-
-    private var sourceReaderJob: Job? = null
-
-    private fun readSourceAsync() {
-        val isReading = sourceReaderJob?.isActive
-        if (!cache.isComplete && isReading != true) {
-            sourceReaderJob = readSource()
-        }
-    }
-
-    private fun readSource() = launch {
-        source.open(cache.available)
-        val buffer = ByteArray(SIZE_BUFFER)
-        var bytes = source.read(buffer)
-        while (bytes > 0) {
-            cache.write(buffer, 0, bytes)
-            notifyNewDataAvailable()
-            bytes = source.read(buffer)
-        }
-        cache.complete()
-    }
-
-    private fun notifyNewDataAvailable() = synchronized(lock) {
-        lock.notifyAll()
+        source.close()
+        cache.close()
     }
 
 
-    private fun waitForSource() = synchronized(lock) {
-        lock.wait(1000)
-    }
+//    private fun readSource() = launch {
+//        source.open(cache.available)
+//        val buffer = ByteArray(SIZE_BUFFER)
+//        var bytes = source.read(buffer)
+//        while (bytes > 0) {
+//            cache.write(buffer, 0, bytes)
+//            notifyNewDataAvailable()
+//            bytes = source.read(buffer)
+//        }
+//        cache.complete()
+//    }
 
-    private val lock = java.lang.Object()
+//    private fun notifyNewDataAvailable() = synchronized(lock) {
+//        lock.notifyAll()
+//    }
+//
+//
+//    private fun waitForSource() = synchronized(lock) {
+//        lock.wait(1000)
+//    }
+
+//    private val lock = java.lang.Object()
 
 }
