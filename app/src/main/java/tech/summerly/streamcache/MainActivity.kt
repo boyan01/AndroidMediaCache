@@ -24,9 +24,13 @@ class MainActivity : AppCompatActivity() {
 
     private val job = Job()
 
-    private val url = "http://m10.music.126.net/20180225130559/499c312b4b33381d8f94c8f9f003af49/ymusic/f7bd/08f4/4466/391ca02c47cb6477cfe2c1dd061c54e8.mp3"
+    private val url = "http://audionautix.com/Music/AllGoodInTheWood.mp3"
 
     private val file = File("sdcard/test.mp3")
+
+    private var isSeekBarTracking = false
+
+    private var currentSelected = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,31 +38,39 @@ class MainActivity : AppCompatActivity() {
         if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 100)
         }
-        button.setOnClickListener {
-            button.isClickable = false
-            if (!mediaPlayer.isPlaying) {
-                seekBar.isEnabled = false
-                val dataSource = CachedDataSource(Uri.parse(url))
-                mediaPlayer.reset()
-                mediaPlayer.setDataSource(MediaDataSourceDelegate(dataSource))
-                mediaPlayer.prepareAsync()
-                mediaPlayer.setOnPreparedListener {
-                    mediaPlayer.start()
-                    seekBar.isEnabled = true
-                    button.isClickable = true
+        buttonStart.setOnClickListener {
+
+            val uri = when (currentSelected) {
+                1 -> Uri.parse(url)
+                2 -> Uri.fromFile(file)
+                else -> {
+                    return@setOnClickListener
                 }
+            }
+            seekBar.isEnabled = false
+            val dataSource = CachedDataSource(uri)
+            mediaPlayer.reset()
+            mediaPlayer.setDataSource(MediaDataSourceDelegate(dataSource))
+            mediaPlayer.prepareAsync()
+            mediaPlayer.setOnPreparedListener {
+                mediaPlayer.start()
+                seekBar.isEnabled = true
             }
         }
 
         launch(UI + job) {
             while (true) {
                 delay(500)
-                text.text = "%s/%s".format(mediaPlayer.currentPosition.toMusicTimeStamp(), mediaPlayer.duration.toMusicTimeStamp())
-                seekBar.progress = (mediaPlayer.currentPosition / 1000).toInt()
-                seekBar.max = (mediaPlayer.duration / 1000).toInt()
+                if (isSeekBarTracking) {
+                    continue
+                }
+                textTime.text = "%s/%s".format(mediaPlayer.currentPosition.toMusicTimeStamp(), mediaPlayer.duration.toMusicTimeStamp())
+                seekBar.progress = (mediaPlayer.currentPosition / 1000)
+                seekBar.max = (mediaPlayer.duration / 1000)
             }
         }
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
                     val seek = progress * 1000L
@@ -68,11 +80,31 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                isSeekBarTracking = true
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                isSeekBarTracking = false
             }
         })
+        button1.setOnClickListener {
+            currentSelected = 1
+            setSelectedDesc()
+        }
+        button2.setOnClickListener {
+            currentSelected = 2
+            setSelectedDesc()
+        }
+        setSelectedDesc()
+    }
+
+    private fun setSelectedDesc() {
+        val desc = when (currentSelected) {
+            1 -> "http source"
+            2 -> "local file"
+            else -> "none"
+        }
+        textDesc.text = getString(R.string.template_selected_source, desc)
     }
 
     private fun Number.toMusicTimeStamp(): String = with(this.toLong() / 1000) {
