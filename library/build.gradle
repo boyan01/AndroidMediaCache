@@ -3,7 +3,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.novoda:bintray-release:0.8.0'
+        classpath 'com.novoda:bintray-release:0.8.1'
     }
 }
 
@@ -24,8 +24,6 @@ android {
         versionName "1.2.0"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        multiDexEnabled true
-
     }
 
     buildTypes {
@@ -33,12 +31,6 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
-    }
-}
-
-kotlin {
-    experimental {
-        coroutines "enable"
     }
 }
 
@@ -65,7 +57,7 @@ publish {
     groupId = 'tech.summerly'
     artifactId = 'streamcache'
     publishVersion = android.defaultConfig.versionName
-    description = 'cache MediaPlayer stream to file when playing'
+    desc = 'cache MediaPlayer stream to file when playing'
     website = 'http://summerly.tech'
 
 }
